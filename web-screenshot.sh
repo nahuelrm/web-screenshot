@@ -106,7 +106,8 @@ if [[ -n $status_codes ]]; then
 fi
 
 if $report; then
-	echo "# Web Screeshots Report\n" >> web-screenshots-report.md 
+	echo "# Web Screeshots Report" >> web-screenshots-report.md 
+	echo "" >> web-screenshots-report.md
 	echo "### $(date)" >> web-screenshots-report.md
 
 	i=0; for image in $(ls $screenshots_path); do
