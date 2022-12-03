@@ -13,7 +13,6 @@ purple="\e[0;35m\033[1m"
 cyan="\e[0;36m\033[1m"
 gray="\e[0;37m\033[1m"
 
-
 help_panel() {
 	echo -e "${gray}command line web screenshot tool and information gathering${endColor}"
 	echo -e "${cyan}Usage:${gray} web-screenshot [options] ${endColor}"
@@ -26,12 +25,7 @@ help_panel() {
 	echo -e "\n\t${yellow}-t${gray}\t\tsave web technologies details${endColor}"
 	echo -e "\n\t${yellow}-l${gray}\t\tsave gowitness log${endColor}"
 	echo -e "\n\t${yellow}-s${gray}\t\tsilent output${endColor}"
-	echo -e "\n\t${yellow}-c <number/s>${gray}\tstatus codes to filter while taking screenshots${endColor}"
-	echo -e "\t\t\tFor example you can save 500 status codes domains in a"
-	echo -e "\t\t\tseparated file like this: ${yellow}-c 500${endColor}"
-	echo -e "\t\t\tYou can also filter by more than one status code like "
-	echo -e "\t\t\tthis: ${yellow}-c 500,403${endColor} separating status codes with a comma ','"
-	echo -e "\t\t\twithout a space between them."
+	echo -e "\n\t${yellow}-c${gray}\t\tfilter every response status-code while taking screenshots${endColor}"
 	exit
 }
 
@@ -39,20 +33,19 @@ format_url() {
 	echo $1 | sed 's|https-|https://|' | sed 's|http-|http://|' | sed 's/.png//'
 }
 
-
 # Main
 
 if [[ $# == 0 ]]; then help_panel; fi
 
-optstring="f:d:P:c:Htsrl"
-domain_option=0; report=false; headers=false; technologies=false; single=false; file=false; silent=false; log=false; status_codes=""; screenshots_path="screenshots";
+optstring="f:d:P:cHtsrl"
+domain_option=0; report=false; headers=false; technologies=false; single=false; file=false; silent=false; log=false; status_codes=false; screenshots_path="screenshots";
 
 while getopts $optstring opt 2>/dev/null; do
 	case $opt in
 		"H") headers=true ;;
 		"t") technologies=true ;;
 		"s") silent=true ;;
-		"c") status_codes=$OPTARG ;;
+		"c") status_codes=true ;;
 		"P") screenshots_path=$OPTARG ;;
 		"d") single=true; domain=$OPTARG; let domain_option+=1 ;;
 		"r") report=true ;;
@@ -98,10 +91,10 @@ if $technologies; then
 	sqlite3 /tmp/gowitness.sqlite3 "select * from technologies;" | rev | awk -F "|" '{print $1, $2}' | rev > data/technologies
 fi
 
-if [[ -n $status_codes ]]; then
+if $status_codes; then
 	mkdir data/status_codes
-	for code in $(echo $status_codes | sed 's/,/ /g'); do
-		cat data/log | grep "$code" | rev | awk '{print $1}' | rev | sed 's/url=//' > data/status_codes/${code}_statuscodes
+	for code in $(cat data/log | grep "statuscode" | awk '{print $8}' | sed 's/.*=//' | sort -u); do
+		grep -F "$code" data/log | rev | awk '{print $1}' | rev | sed 's/url=//' > data/status_codes/$(echo $code | sed 's/.*m//')_statuscodes
 	done
 fi
 

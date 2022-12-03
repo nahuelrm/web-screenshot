@@ -30,10 +30,5 @@ Options:
 
 	-s		silent output
 
-	-c <number/s>	status codes to filter while taking screenshots
-			For example you can save 500 status codes domains in a
-			separated file like this: -c 500
-			You can also filter by more than one status code like 
-			this: -c 500,403 separating status codes with a comma ','
-			without a space between them.
+	-c		filter every response status code while taking screenshots
 ```
