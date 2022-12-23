@@ -28,6 +28,8 @@ Options:
 
 	-l		save gowitness log
 
+	-o <path>	path to output directory to store all the results
+
 	-s		silent output
 
 	-c		filter every response status code while taking screenshots
